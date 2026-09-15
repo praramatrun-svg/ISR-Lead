@@ -4,29 +4,31 @@ const APP = Object.freeze({
   ROLES: ['EMPLOYEE', 'TELESALES', 'ADMIN', 'SUPER_ADMIN']
 });
 
-function doGet(e) {
-  const t = HtmlService.createTemplateFromFile('Index');
-  t.refParam = String((e && e.parameter && e.parameter.ref) || '').trim();
-  t.companyParam = String((e && e.parameter && e.parameter.company) || '').trim();
-  
-  let rawUrl = '';
+function doPost(e) {
   try {
-    rawUrl = ScriptApp.getService().getUrl();
+    var requestData = JSON.parse(e.postData.contents);
+    var action = requestData.action;
+    var params = requestData.params || [];
+    
+    var result;
+    if (typeof this[action] === 'function') {
+      result = this[action].apply(null, params);
+    } else {
+      throw new Error("Function " + action + " not found");
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "success",
+      data: result
+    })).setMimeType(ContentService.MimeType.JSON);
+    
   } catch (err) {
-    rawUrl = '';
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "error",
+      message: err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
   }
-  let execUrl = rawUrl.replace(/\/u\/\d+\//, '/');
-  if (execUrl.indexOf('/exec') === -1 && execUrl.indexOf('/dev') === -1 && execUrl !== '') {
-    execUrl = execUrl.replace(/\/edit.*$/, '/exec');
-  }
-  t.execUrl = execUrl;
-
-  return t.evaluate()
-    .setTitle('Autocorp Holding - Lead Management')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
-
 function setupSystem() {
   const ss = SpreadsheetApp.getActive();
   const schemas = {};
@@ -625,4 +627,31 @@ function logActivity_(companyId, leadId, userId, type, oldVal, newVal, note) {
     note: clean_(note, 500),
     created_at: new Date()
   });
+}
+// ฟังก์ชันสำหรับรับ Request จากภายนอก (เช่น Vercel)
+function doPost(e) {
+  try {
+    const requestData = JSON.parse(e.postData.contents);
+    const action = requestData.action;
+    const params = requestData.params || [];
+    
+    // เรียกฟังก์ชันเดิมที่คุณมีอยู่ใน Apps Script ตามชื่อ action
+    let result;
+    if (typeof this[action] === 'function') {
+      result = this[action].apply(null, params);
+    } else {
+      throw new Error("Function " + action + " not found");
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "success",
+      data: result
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "error",
+      message: err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
 }
