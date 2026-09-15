@@ -1,3 +1,62 @@
+<script>
+  // 1. นำ URL ของ Web App จาก Google Apps Script (ที่ได้จากขั้นตอนที่ 1) มาใส่ตรงนี้
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-5huqOvvZt2kR34o0zPyHToWqG_pnd_gBwrny2lriQDJYTFUKXjkLVq-T6M5Fjkv9/exec";
+
+  // 2. ตัวแปลง google.script.run ให้ส่งข้อมูลผ่าน fetch อัตโนมัติ
+  if (typeof google === 'undefined' || !google.script || !google.script.run) {
+    window.google = window.google || {};
+    window.google.script = window.google.script || {};
+    
+    window.google.script.run = new Proxy({}, {
+      get: function(target, prop) {
+        let successHandler = null;
+        let failureHandler = null;
+
+        const runner = {
+          withSuccessHandler: function(fn) {
+            successHandler = fn;
+            return runner;
+          },
+          withFailureHandler: function(fn) {
+            failureHandler = fn;
+            return runner;
+          }
+        };
+
+        return new Proxy(function() {}, {
+          get: function(t, p) {
+            if (p === 'withSuccessHandler') return runner.withSuccessHandler;
+            if (p === 'withFailureHandler') return runner.withFailureHandler;
+            return runner[p];
+          },
+          apply: function(target, thisArg, argumentsList) {
+            fetch(SCRIPT_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // ใช้ text/plain เพื่อเลี่ยงปัญหา CORS Preflight
+              body: JSON.stringify({
+                action: prop,
+                params: argumentsList
+              })
+            })
+            .then(res => res.json())
+            .then(response => {
+              if (response.status === 'success') {
+                if (successHandler) successHandler(response.data);
+              } else {
+                if (failureHandler) failureHandler(new Error(response.message));
+                else console.error(response.message);
+              }
+            })
+            .catch(err => {
+              if (failureHandler) failureHandler(err);
+              else console.error(err);
+            });
+          }
+        });
+      }
+    });
+  }
+</script>
 <!DOCTYPE html>
 <html lang="th">
 <head>
