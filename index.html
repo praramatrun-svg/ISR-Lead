@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      --primary: #0b2239;
+      --primary-hover: #173b5e;
+      --secondary: #eff6ff;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --success: #16a34a;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius: 16px;
+      --shadow: 0 10px 25px -5px rgba(15,23,42,0.1), 0 8px 10px -6px rgba(15,23,42,0.05);
+    }
+    * { box-sizing: border-box; }
+    
+    body {
+      margin: 0; font-family: 'Prompt', sans-serif;
+      background-color: var(--bg); color: var(--text); line-height: 1.5;
+      -webkit-font-smoothing: antialiased; min-height: 100vh;
+      position: relative;
+    }
+
+    body.theme-login {
+      background: linear-gradient(rgba(7, 21, 36, 0.78), rgba(4, 13, 23, 0.85)),
+                  url('https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=1600&auto=format&fit=crop') center/cover no-repeat fixed !important;
+    }
+    body.theme-portal { background: #f8fafc !important; }
+
+    /* ป้องกันการบล็อกคลิก: คลาส hidden ต้องไม่รับ event ใดๆ เด็ดขาด */
+    .hidden {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      z-index: -9999 !important;
+    }
+
+    button, input, select, textarea, span, a { 
+      font-family: inherit; 
+      pointer-events: auto;
+    }
+
+    .top {
+      position: sticky; top: 0; z-index: 30;
+      background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(12px);
+      padding: 12px 24px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--line);
+    }
+    .top-brand {
+      display: flex; align-items: center; gap: 12px; white-space: nowrap; overflow: hidden;
+    }
+
+    .wrap { 
+      max-width: 1080px; 
+      margin: auto; 
+      padding: 20px 16px; 
+      position: relative; 
+      z-index: 10; 
+      pointer-events: auto !important;
+    }
+    
+    .card-login {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: var(--radius);
+      padding: 34px 28px;
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4);
+      margin: 30px auto;
+      max-width: 460px;
+      position: relative;
+      z-index: 20;
+      pointer-events: auto !important;
+    }
+
+    .brand-group-strip {
+      display: inline-flex; align-items: center; gap: 12px; flex-shrink: 0;
+    }
+    .brand-group-strip.in-card {
+      display: flex; justify-content: center; padding: 12px; background: #f8fafc;
+      border: 1px solid var(--line); border-radius: 12px; margin-bottom: 20px;
+    }
+    .logo-autocorp-box { display: flex; flex-direction: column; align-items: center; line-height: 1; flex-shrink: 0; }
+    .logo-autocorp-main { display: flex; align-items: center; gap: 4px; }
+    .ac-icon { width: 22px; height: 22px; border-radius: 50%; border: 3.5px solid #1a3350; position: relative; }
+    .ac-icon::after {
+      content: ''; position: absolute; top: -3.5px; right: -3.5px; width: 11px; height: 11px;
+      border-top: 3.5px solid #94a3b8; border-right: 3.5px solid #94a3b8; border-radius: 0 50% 0 0;
+    }
+    .ac-text { font-size: 11px; font-weight: 800; color: #1a3350; line-height: 1; text-align: left; }
+    .ac-sub { font-size: 7px; font-weight: 700; color: #1a3350; margin-top: 2px; white-space: nowrap; }
+    .logo-maliwan-box { font-size: 14px; font-weight: 800; letter-spacing: 2.5px; color: #0b2239; display: inline-flex; align-items: center; flex-shrink: 0; }
+    .logo-maliwan-box sup { font-size: 7.5px; margin-left: 1px; font-weight: 600; }
+    .logo-autoclik-pill { background: #1e242b; padding: 2px 7px; border-radius: 6px; display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0; }
+    .clik-c { width: 16px; height: 16px; border-radius: 50%; border: 3px solid #f59e0b; border-right-color: transparent; display: inline-block; transform: rotate(45deg); }
+    .clik-text-col { display: flex; flex-direction: column; line-height: 0.9; }
+    .clik-text-top { color: #f59e0b; font-size: 7px; font-weight: 800; }
+    .clik-text-bot { color: #f59e0b; font-size: 10px; font-weight: 900; }
+    .header-sep { height: 18px; width: 1px; background: #cbd5e1; }
+    .header-company-name { font-size: 13.5px; font-weight: 700; color: var(--primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 24px 20px; box-shadow: var(--shadow); margin-bottom: 18px;
+      position: relative; z-index: 10;
+    }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; width: 100%; }
+    .full { grid-column: 1 / -1; }
+    h2 { font-size: 1.25rem; font-weight: 700; margin: 0 0 6px; line-height: 1.35; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin: 0 0 6px; }
+    label { display: block; font-size: 13px; margin-bottom: 4px; font-weight: 600; color: #334155; }
+    input, select, textarea {
+      width: 100%; min-height: 44px; padding: 8px 12px;
+      border: 1.5px solid var(--line); border-radius: 10px; background: #fff; font-size: 14px;
+      transition: border-color .15s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none; border-color: var(--primary);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
+    }
+    button {
+      border: 0; border-radius: 10px; padding: 10px 18px; min-height: 44px;
+      cursor: pointer; font-weight: 600; font-size: 13.5px; transition: all .15s ease;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      user-select: none;
+    }
+    .primary { background: var(--primary); color: #fff; }
+    .primary:hover { filter: brightness(1.15); }
+    .ghost { background: #f1f5f9; color: #334155; }
+    .ghost:hover { background: #e2e8f0; }
+    .success-btn { background: var(--success); color: #fff; }
+    
+    .eyebrow { color: var(--primary); font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 4px; }
+    .intro { color: var(--muted); margin-top: 0; margin-bottom: 16px; font-size: 13px; line-height: 1.5; }
+    
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+    .stat { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+    .stat span { color: var(--muted); font-size: 12.5px; font-weight: 500; }
+    .stat b { font-size: 22px; color: var(--text); margin-top: 4px; display: block; }
+    
+    .nav-tabs { display: flex; gap: 8px; border-bottom: 2px solid var(--line); margin-bottom: 18px; overflow-x: auto; }
+    .nav-tab {
+      padding: 11px 18px; border: 0; background: transparent; color: var(--muted);
+      border-bottom: 3px solid transparent; border-radius: 0; font-weight: 600; cursor: pointer;
+      font-size: 13.5px; white-space: nowrap;
+    }
+    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); background: rgba(11,34,57,0.04); }
+    
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 11px 12px; border-bottom: 1px solid var(--line); text-align: left; }
+    th { background: #f8fafc; color: #475569; font-weight: 600; }
+    
+    .modal {
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center;
+      padding: 16px; z-index: 200;
+    }
+    .modal > .card { width: min(580px, 100%); margin: 0; max-height: 90vh; overflow-y: auto; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 16px; font-size: 11px; font-weight: 600; }
+    .badge-primary { background: #eff6ff; color: #1e40af; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
+
+    .choice-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .choice { position: relative; }
+    .choice input { position: absolute; opacity: 0; }
+    .choice span {
+      display: flex; min-height: 52px; align-items: center; justify-content: center;
+      text-align: center; border: 1.5px solid var(--line); border-radius: 10px;
+      padding: 6px; font-weight: 600; font-size: 13px; cursor: pointer; background: #fff;
+    }
+    .choice input:checked + span { border: 2px solid var(--primary); background: var(--secondary); color: var(--primary); }
+
+    .name-row-grid {
+      display: grid;
+      grid-template-columns: 110px 1fr 1fr;
+      gap: 12px;
+    }
+
+    .actions.end {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 22px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      width: 100%;
+    }
+    .action-right-wrap {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+      gap: 12px;
+      width: 100%;
+    }
+    .modal-close-pill-btn {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+    .modal-close-pill-btn:hover {
+      background: #fee2e2;
+      color: var(--danger);
+      border-color: #fca5a5;
+    }
+
+    /* CUSTOM DROPDOWN UI */
+    .custom-dropdown-wrap { position: relative; width: 100%; }
+    .custom-dropdown-btn {
+      width: 100%; min-height: 44px; padding: 8px 12px;
+      border: 1.5px solid var(--line); border-radius: 10px; background: #fff; font-size: 14px; color: var(--text);
+      display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none;
+    }
+    .custom-dropdown-btn:focus, .custom-dropdown-btn.active {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
+    }
+    .custom-dropdown-btn[disabled] { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
+    .custom-dropdown-arrow {
+      border: solid #64748b; border-width: 0 2px 2px 0; display: inline-block; padding: 3.5px;
+      transform: rotate(45deg); transition: transform 0.2s ease;
+    }
+    .custom-dropdown-btn.active .custom-dropdown-arrow { transform: rotate(-135deg); }
+    .custom-dropdown-menu {
+      position: absolute; top: calc(100% + 4px) !important; bottom: auto !important; left: 0; right: 0;
+      background: #ffffff; border: 1.5px solid var(--line); border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.18); z-index: 999; max-height: 160px; overflow-y: auto; display: none;
+    }
+    .custom-dropdown-menu.open { display: block !important; }
+    .custom-dropdown-group-title {
+      padding: 6px 12px 3px; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+      background: #f8fafc; border-bottom: 1px solid var(--line);
+    }
+    .custom-dropdown-item { padding: 9px 12px; font-size: 13.5px; cursor: pointer; }
+    .custom-dropdown-item:hover { background: var(--secondary); color: var(--primary); font-weight: 500; }
+
+    .pdpa-box { background: #f8fafc; border: 1px solid var(--line); border-radius: 12px; padding: 18px 16px; width: 100%; }
+    .pdpa-header h4 { margin: 0 0 4px 0; font-size: 14.5px; font-weight: 700; color: var(--primary); }
+    .pdpa-item { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+    .pdpa-text { font-size: 12.5px; color: #1e293b; line-height: 1.6; margin-bottom: 8px; }
+    .pdpa-choices { display: flex; gap: 18px; padding-top: 6px; border-top: 1px dashed var(--line); }
+    .pdpa-choice-label { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .pdpa-choice-label input[type="radio"] { width: 16px; min-height: 16px; accent-color: var(--primary); }
+
+    .branch-card {
+      background: #f8fafc; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px;
+      display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+    }
+
+    #toastContainer {
+      position: fixed; top: 16px; right: 16px; z-index: 10000;
+      display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+    }
+    .toast {
+      pointer-events: auto; display: flex; align-items: center; gap: 10px;
+      background: #fff; border: 1px solid var(--line); padding: 11px 16px;
+      border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      font-size: 13px; font-weight: 500; transform: translateY(-20px); opacity: 0; transition: all 0.25s ease;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-success { border-left: 4px solid var(--success); }
+    .toast-error { border-left: 4px solid var(--danger); }
+
+    #globalLoading {
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(2px); z-index: 9999; display: flex;
+      flex-direction: column; align-items: center; justify-content: center; color: #fff;
+    }
+    .spinner {
+      width: 38px; height: 38px; border: 3px solid rgba(255,255,255,0.25);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin 0.7s linear infinite; margin-bottom: 10px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Modal ของ Lead Container */
+    .lead-container { display: none !important; pointer-events: none !important; }
+    .lead-container.active-modal {
+      display: flex !important; pointer-events: auto !important;
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(5px);
+      align-items: center; justify-content: center; padding: 20px; z-index: 150;
+    }
+    .lead-container.active-modal .card { width: min(720px, 92vw) !important; margin: auto !important; max-height: 90vh; overflow-y: auto; }
+
+    /* หน้ารายละเอียด Lead */
+    .detail-section-title {
+      font-size: 13.5px; font-weight: 700; color: var(--primary);
+      border-bottom: 1.5px solid var(--line); padding-bottom: 6px; margin: 16px 0 10px;
+    }
+    .detail-field { margin-bottom: 8px; }
+    .detail-field span { font-size: 12px; color: var(--muted); display: block; }
+    .detail-field b { font-size: 13.5px; color: var(--text); }
+
+    @media (min-width: 769px) {
+      .desktop-steps { display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 8px 0 20px; }
+      .desktop-steps .step { padding: 9px 4px; border-radius: 10px; background: #f1f5f9; color: #64748b; text-align: center; font-size: 12.5px; font-weight: 600; }
+      .desktop-steps .step.on { background: var(--primary); color: #fff; }
+      .mobile-progress-bar { display: none !important; }
+      .agent-desktop-box { display: flex !important; }
+      .agent-mobile-pill { display: none !important; }
+    }
+
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+      .choice-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .wrap { padding: 10px 8px; }
+      .card { border-radius: 14px; padding: 18px 14px; }
+      .top { padding: 10px 12px; }
+      .name-row-grid { grid-template-columns: 85px 1fr; gap: 8px; }
+      .name-row-grid > div:last-child { grid-column: 1 / -1; }
+      .desktop-steps { display: none !important; }
+      .mobile-progress-bar { display: block !important; width: 100%; height: 4px; background: #e2e8f0; border-radius: 4px; margin-bottom: 14px; overflow: hidden; }
+      .mobile-progress-bar-fill { height: 100%; width: 25%; background: var(--primary); transition: width 0.3s ease; }
+      .agent-desktop-box { display: none !important; }
+      .agent-mobile-pill { display: inline-flex !important; align-items: center; gap: 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 24px; padding: 5px 12px; margin-bottom: 12px; font-size: 12px; }
+      .lead-container.active-modal { position: static !important; background: transparent !important; padding: 0 !important; display: block !important; }
+      .header-company-name { max-width: 120px; font-size: 11.5px; }
+      .actions.end button { min-width: 100px; }
+    }
+  </style>
+</head>
+<body class="theme-login">
+  <div id="toastContainer"></div>
+
+  <div id="globalLoading" class="hidden">
+    <div class="spinner"></div>
+    <div id="globalLoadingText" style="font-size:13.5px">กำลังประมวลผล...</div>
+  </div>
+
+  <header class="top">
+    <div class="top-brand">
+      <div class="brand-group-strip">
+        <div class="logo-autocorp-box">
+          <div class="logo-autocorp-main">
+            <div class="ac-icon"></div>
+            <div class="ac-text">auto<br>corp</div>
+          </div>
+          <div class="ac-sub">ACG</div>
+        </div>
+        <div class="header-sep"></div>
+        <div class="logo-maliwan-box">MALIWAN<sup>®</sup></div>
+        <div class="header-sep"></div>
+        <div class="logo-autoclik-pill">
+          <span class="clik-c"></span>
+          <div class="clik-text-col">
+            <span class="clik-text-top">AUTO</span>
+            <span class="clik-text-bot">Clik</span>
+          </div>
+        </div>
+      </div>
+      <div id="brandHeaderName" class="header-company-name"></div>
+    </div>
+    <div id="userbar"></div>
+  </header>
+
+  <main class="wrap">
+    
+    <!-- 1. LOGIN -->
+    <section id="loginView" class="card-login">
+      <div class="brand-group-strip in-card">
+        <div class="logo-autocorp-box">
+          <div class="logo-autocorp-main">
+            <div class="ac-icon"></div>
+            <div class="ac-text">auto<br>corp</div>
+          </div>
+          <div class="ac-sub">ACG : Autocorp Group</div>
+        </div>
+        <div class="header-sep" style="height:22px;margin:0 4px"></div>
+        <div class="logo-maliwan-box">MALIWAN<sup>®</sup></div>
+        <div class="header-sep" style="height:22px;margin:0 4px"></div>
+        <div class="logo-autoclik-pill">
+          <span class="clik-c"></span>
+          <div class="clik-text-col">
+            <span class="clik-text-top">AUTO</span>
+            <span class="clik-text-bot">Clik</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="eyebrow" style="text-align:center">Employee Portal</div>
+      <h2 style="text-align:center;margin-bottom:4px">เข้าสู่ระบบพนักงาน</h2>
+      <p class="intro" style="text-align:center">ระบบงานประกันภัย เครือออโตคอร์ป โฮลดิ้ง</p>
+      
+      <p>
+        <label>ชื่อผู้ใช้</label>
+        <input id="loginUser" autocomplete="username" placeholder="ระบุ username">
+      </p>
+      <p style="margin-bottom:6px">
+        <label>รหัสผ่าน</label>
+        <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••" onkeydown="if(event.key==='Enter') login()">
+      </p>
+
+      <div style="text-align:right;margin-bottom:16px">
+        <span onclick="showForgotPasswordModal()" style="font-size:12px;color:var(--primary);cursor:pointer;font-weight:600">ลืมรหัสผ่าน?</span>
+      </div>
+
+      <div class="actions" style="flex-direction:column;gap:8px">
+        <button type="button" class="primary" style="width:100%" onclick="login()">เข้าสู่ระบบ</button>
+        <button type="button" class="ghost" style="width:100%" onclick="showRegister()">สมัครพนักงานใหม่</button>
+      </div>
+    </section>
+
+    <!-- 2. REGISTER -->
+    <section id="registerView" class="card hidden" style="max-width:500px;margin:16px auto">
+      <div class="eyebrow">ลงทะเบียนพนักงาน</div>
+      <h2>สมัครเข้าใช้งาน</h2>
+      <p class="intro">กรอกข้อมูลและเลือกสังกัดบริษัท/สาขาของคุณ</p>
+      <div class="grid">
+        <div class="full">
+          <label>สังกัดบริษัท *</label>
+          <select id="regCompany" onchange="onRegisterCompanyChange()" required>
+            <option value="">เลือกบริษัท</option>
+          </select>
+        </div>
+        <div class="full">
+          <label>หน้าที่งาน *</label>
+          <select id="regRole">
+            <option value="EMPLOYEE">พนักงานขายประกัน / ตัวแทนแนะนำ</option>
+            <option value="TELESALES">ธุรการขาย / Telesales</option>
+          </select>
+        </div>
+        <div>
+          <label>ชื่อ–นามสกุล *</label>
+          <input id="regName" placeholder="เช่น สุชาติ รักงาน" required>
+        </div>
+        <div>
+          <label>สาขาประจำการ *</label>
+          <select id="regBranch" required disabled>
+            <option value="">เลือกบริษัทก่อน</option>
+          </select>
+        </div>
+        <div>
+          <label>เบอร์โทรศัพท์ *</label>
+          <input id="regPhone" inputmode="tel" placeholder="08XXXXXXXX" required>
+        </div>
+        <div>
+          <label>รหัสพนักงาน (ถ้ามี)</label>
+          <input id="regCode" placeholder="เว้นว่างได้">
+        </div>
+        <div class="full">
+          <label>ชื่อผู้ใช้ (Username) *</label>
+          <input id="regUsername" autocomplete="username" required>
+        </div>
+        <div class="full">
+          <label>รหัสผ่าน (6 ตัวขึ้นไป) *</label>
+          <input id="regPassword" type="password" autocomplete="new-password" required>
+        </div>
+      </div>
+      <div class="actions" style="margin-top:20px">
+        <button type="button" class="primary" style="flex:1" onclick="registerEmployee()">ยืนยันการสมัคร</button>
+        <button type="button" class="ghost" onclick="showLogin()">กลับหน้าล็อกอิน</button>
+      </div>
+    </section>
+
+    <!-- 3. EMPLOYEE PORTAL -->
+    <section id="portalEmployee" class="hidden">
+      <div class="card" style="border:1.5px solid #bfdbfe">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+          <div>
+            <span class="badge badge-primary">ตัวแทนแนะนำประกันภัย</span>
+            <h2 style="margin-top:4px;font-size:18px" id="empCardName">คุณพนักงาน</h2>
+            <div style="color:var(--muted);font-size:12px" id="empCardSub">รหัสตัวแทน: -</div>
+          </div>
+          <button type="button" class="primary" onclick="showLeadForm()">+ สร้าง Lead ใหม่</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:8px;margin-top:14px">
+          <button type="button" class="ghost" style="background:#fff" onclick="showReferralQrModal()">📲 เปิด QR Code</button>
+          <button type="button" class="ghost" style="background:#fff" onclick="copyRefLink()">📋 คัดลอกลิงก์</button>
+          <button type="button" class="success-btn" onclick="shareToLine()">💬 แชร์ LINE</button>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><span>ลูกค้าที่ส่ง</span><b id="empStatAll">0</b></div>
+        <div class="stat"><span>ยืนยันเบอร์</span><b id="empStatVerified">0</b></div>
+        <div class="stat"><span>ประสานงาน</span><b id="empStatFollow">0</b></div>
+        <div class="stat"><span>ปิดการขาย</span><b id="empStatWon">0</b></div>
+      </div>
+      <div class="card">
+        <h3>ประวัติลูกค้าที่คุณแนะนำ</h3>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr><th>อ้างอิง</th><th>ชื่อลูกค้า</th><th>สาขา</th><th>ข้อมูลรถ</th><th>แผน</th><th>สถานะ</th><th>วันที่ส่ง</th></tr>
+            </thead>
+            <tbody id="empLeadRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. TELESALES PORTAL -->
+    <section id="portalTelesales" class="hidden">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+          <div>
+            <h2 style="font-size:18px">Telesales Workspace (ฝ่ายขายส่วนกลาง)</h2>
+            <p class="intro" style="margin:0" id="teleCardSub">ติดตามผลการติดต่อ ดูแลและปิดการขายทุกสาขา</p>
+          </div>
+          <div class="actions" style="flex-wrap:wrap">
+            <button type="button" class="ghost" style="background:#fff;border:1px solid var(--line)" onclick="showReferralQrModal()">📲 QR Code ของฉัน</button>
+            <button type="button" class="primary" onclick="showLeadForm()">+ สร้าง Lead ใหม่</button>
+            <button type="button" class="ghost" onclick="loadLeads()">🔄 รีเฟรชข้อมูล</button>
+          </div>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><span>งานในมือ</span><b id="teleStatAll">0</b></div>
+        <div class="stat"><span>รอดำเนินการ</span><b id="teleStatPending">0</b></div>
+        <div class="stat"><span>กำลังติดตาม</span><b id="teleStatFollow">0</b></div>
+        <div class="stat"><span>ปิดการขาย</span><b id="teleStatWon">0</b></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <h3 style="margin:0">รายการ Lead ที่ต้องดูแล</h3>
+          <select id="teleFilterStatus" onchange="filterTelesalesLeads()" style="width:auto;min-height:34px;padding:2px 8px;font-size:12px">
+            <option value="ALL">สถานะทั้งหมด</option>
+            <option value="VERIFIED">ยืนยันแล้ว</option>
+            <option value="CONTACTING">กำลังติดต่อ</option>
+            <option value="FOLLOW_UP">นัดติดตาม</option>
+            <option value="WON">ปิดการขายสำเร็จ</option>
+          </select>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr><th>ลูกค้า</th><th>สาขา / บริษัท</th><th>เบอร์ติดต่อ</th><th>วัน-เวลาสะดวก</th><th>ข้อมูลรถ & แผน</th><th>สถานะ</th><th>การทำงาน</th></tr>
+            </thead>
+            <tbody id="teleLeadRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. ADMIN PORTAL -->
+    <section id="portalAdmin" class="hidden">
+      <div class="stats">
+        <div class="stat"><span>Lead ทั้งหมด</span><b id="admStatAll">0</b></div>
+        <div class="stat"><span>รอดำเนินการ</span><b id="admStatPending">0</b></div>
+        <div class="stat"><span>กำลังติดตาม</span><b id="admStatFollow">0</b></div>
+        <div class="stat"><span>ยอดขายสำเร็จ</span><b id="admStatWon" style="color:var(--success)">0</b></div>
+      </div>
+
+      <div class="nav-tabs">
+        <button type="button" class="nav-tab active" id="tabBtnAnalytics" onclick="switchAdminTab('analytics')">📊 สถิติ & แนวโน้ม</button>
+        <button type="button" class="nav-tab" id="tabBtnLeads" onclick="switchAdminTab('leads')">📋 รายการ Lead ทั้งหมด</button>
+        <button type="button" class="nav-tab" id="tabBtnStaff" onclick="switchAdminTab('staff')">👥 จัดการพนักงาน</button>
+      </div>
+
+      <div id="admTabAnalytics">
+        <div class="grid">
+          <div class="card">
+            <h3>🏆 ผลการดำเนินงานแยกตามสาขา</h3>
+            <p class="intro">คลิกที่สาขาเพื่อดูรายชื่อ Lead</p>
+            <div id="branchRankingList"></div>
+          </div>
+          <div class="card">
+            <h3>📈 สัดส่วนประเภทประกัน</h3>
+            <p class="intro">คลิกที่แผนประกันเพื่อดูรายชื่อลูกค้า</p>
+            <div id="productTrendList"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="admTabLeads" class="hidden">
+        <div class="card">
+          <div class="actions" style="margin-bottom:12px">
+            <button type="button" class="primary" onclick="showLeadForm()">+ สร้าง Lead ใหม่</button>
+            <button type="button" class="ghost" onclick="loadLeads()">รีเฟรช</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>อ้างอิง</th><th>ลูกค้า</th><th>สาขา</th><th>โทร</th><th>รถ & ประกัน</th><th>สถานะ</th><th>ผู้รับผิดชอบ</th><th>วันที่</th></tr></thead>
+              <tbody id="admLeadRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="admTabStaff" class="hidden">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <h3 style="margin:0">พนักงานรออนุมัติ</h3>
+            <button type="button" class="ghost" onclick="showUserModal()">+ สร้างพนักงาน</button>
+          </div>
+          <div id="adminPendingUsers"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. LEAD VIEW / MODAL -->
+    <div id="leadContainer" class="lead-container">
+      <section id="leadView" style="width:100%;display:flex;justify-content:center">
+        <div class="card" style="width:100%">
+          
+          <div class="modal-top-header">
+            <div>
+              <div class="eyebrow">ระบบรับแจ้งความสนใจประกันภัย</div>
+              <h2 id="leadTitle">แจ้งความสนใจประกันรถยนต์</h2>
+            </div>
+            <button type="button" class="modal-close-pill-btn" onclick="cancelLeadForm()" title="ปิดหน้าต่างนี้">
+              ✕ ปิด
+            </button>
+          </div>
+
+          <div class="desktop-steps">
+            <div class="step on" data-s="1">1. ประกันที่สนใจ</div>
+            <div class="step" data-s="2">2. ข้อมูลรถ</div>
+            <div class="step" data-s="3">3. ข้อมูลติดต่อ</div>
+            <div class="step" data-s="4">4. ข้อตกลงยินยอม</div>
+          </div>
+
+          <div class="mobile-progress-bar">
+            <div id="mobileProgressBarFill" class="mobile-progress-bar-fill"></div>
+          </div>
+
+          <div id="leadMsg"></div>
+          
+          <form id="leadForm" novalidate onsubmit="submitLead(event)">
+            
+            <!-- Step 1: ประกันที่สนใจ -->
+            <div class="form-step grid" data-step="1">
+              <div id="leadCompanyWrap" class="full">
+                <label>บริษัทที่ต้องการให้ติดต่อ *</label>
+                <select name="company_id" id="leadCompany"><option value="">เลือกบริษัท</option></select>
+              </div>
+              <div class="full">
+                <label>สนใจแผนประกันประเภทใด? *</label>
+                <div class="choice-grid">
+                  <label class="choice"><input type="radio" name="insurance_type" value="ชั้น 1" checked><span>ชั้น 1</span></label>
+                  <label class="choice"><input type="radio" name="insurance_type" value="ชั้น 2+"><span>ชั้น 2+</span></label>
+                  <label class="choice"><input type="radio" name="insurance_type" value="ชั้น 3+"><span>ชั้น 3+</span></label>
+                  <label class="choice"><input type="radio" name="insurance_type" value="พ.ร.บ."><span>พ.ร.บ.</span></label>
+                  <label class="choice"><input type="radio" name="insurance_type" value="ขอคำแนะนำ"><span>ขอคำแนะนำ</span></label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2: ข้อมูลรถ -->
+            <div class="form-step grid hidden" data-step="2">
+              <div>
+                <label>ยี่ห้อรถ *</label>
+                <div class="custom-dropdown-wrap" id="brandDdWrap">
+                  <div class="custom-dropdown-btn" id="brandDdBtn" tabindex="0" onclick="toggleDropdown('brand')">
+                    <span id="brandDdLabel">เลือกยี่ห้อรถ</span>
+                    <span class="custom-dropdown-arrow"></span>
+                  </div>
+                  <div class="custom-dropdown-menu" id="brandDdMenu">
+                    <div class="custom-dropdown-group-title">แบรนด์ยอดนิยม</div>
+                    <div class="custom-dropdown-item" onclick="selectBrand('Toyota')">Toyota</div>
+                    <div class="custom-dropdown-item" onclick="selectBrand('Honda')">Honda</div>
+                    <div class="custom-dropdown-item" onclick="selectBrand('Isuzu')">Isuzu</div>
+                    <div class="custom-dropdown-item" onclick="selectBrand('Mitsubishi')">Mitsubishi</div>
+                    <div class="custom-dropdown-item" onclick="selectBrand('Mazda')">Mazda</div>
+                    <div class="custom-dropdown-item" onclick="selectBrand('Ford')">Ford</div>
+                    <div class="custom-dropdown-item" onclick="selectBrand('Nissan')">Nissan</div>
+                    <div class="custom-dropdown-group-title">รถยนต์ไฟฟ้า (EV)</div>
+                    <div class="custom-dropdown-item" onclick="selectBrand('BYD')">BYD</div>
+                    <div class="custom-dropdown-item" onclick="selectBrand('MG')">MG</div>
+                    <div class="custom-dropdown-item" onclick="selectBrand('NETA')">NETA</div>
+                    <div class="custom-dropdown-item" onclick="selectBrand('GWM')">GWM (ORA / Haval)</div>
+                    <div class="custom-dropdown-group-title">รถยุโรป / พรีเมียม</div>
+                    <div class="custom-dropdown-item" onclick="selectBrand('Mercedes-Benz')">Mercedes-Benz</div>
+                    <div class="custom-dropdown-item" onclick="selectBrand('BMW')">BMW</div>
+                    <div class="custom-dropdown-item" onclick="selectBrand('OTHER')">อื่นๆ (ระบุเอง)</div>
+                  </div>
+                </div>
+                <input type="text" id="carBrandCustom" class="hidden" placeholder="พิมพ์ยี่ห้อรถของคุณ" style="margin-top:6px" oninput="$('carBrandHidden').value = this.value.trim()">
+                <input type="hidden" name="car_brand" id="carBrandHidden">
+              </div>
+
+              <div>
+                <label>รุ่นรถ *</label>
+                <div class="custom-dropdown-wrap" id="modelDdWrap">
+                  <div class="custom-dropdown-btn" id="modelDdBtn" tabindex="0" disabled onclick="toggleDropdown('model')">
+                    <span id="modelDdLabel">เลือกยี่ห้อก่อน</span>
+                    <span class="custom-dropdown-arrow"></span>
+                  </div>
+                  <div class="custom-dropdown-menu" id="modelDdMenu"></div>
+                </div>
+                <input type="text" id="carModelCustom" class="hidden" placeholder="พิมพ์รุ่นรถของคุณ" style="margin-top:6px" oninput="$('carModelHidden').value = this.value.trim()">
+                <input type="hidden" name="car_model" id="carModelHidden">
+              </div>
+
+              <div>
+                <label>ปีรถ (ค.ศ.) *</label>
+                <div class="custom-dropdown-wrap" id="yearDdWrap">
+                  <div class="custom-dropdown-btn" id="yearDdBtn" tabindex="0" onclick="toggleDropdown('year')">
+                    <span id="yearDdLabel">เลือกปีรถ (ค.ศ.)</span>
+                    <span class="custom-dropdown-arrow"></span>
+                  </div>
+                  <div class="custom-dropdown-menu" id="yearDdMenu"></div>
+                </div>
+                <input type="hidden" name="car_year" id="carYearHidden">
+              </div>
+
+              <div>
+                <label>ประกันเดิมหมดอายุช่วงใด</label>
+                <select name="insurance_expiry_period">
+                  <option value="">ไม่แน่ใจ</option>
+                  <option>ภายในเดือนนี้</option>
+                  <option>ภายใน 1–3 เดือน</option>
+                  <option>มากกว่า 3 เดือน</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Step 3: ข้อมูลสำหรับติดต่อกลับ -->
+            <div class="form-step grid hidden" data-step="3">
+              <div class="full name-row-grid">
+                <div>
+                  <label>คำนำหน้า</label>
+                  <select name="customer_title"><option>คุณ</option><option>นาย</option><option>นาง</option><option>น.ส.</option></select>
+                </div>
+                <div>
+                  <label>ชื่อจริง *</label>
+                  <input name="customer_first_name" id="custFirstName" placeholder="ระบุชื่อจริง">
+                </div>
+                <div>
+                  <label>นามสกุล *</label>
+                  <input name="customer_last_name" id="custLastName" placeholder="ระบุนามสกุล">
+                </div>
+              </div>
+              <div>
+                <label>เบอร์โทรศัพท์ *</label>
+                <input name="customer_phone" id="custPhone" inputmode="tel" placeholder="08XXXXXXXX">
+              </div>
+              <div>
+                <label>จังหวัด *</label>
+                <input list="provinceList" name="province" id="provinceInput" placeholder="พิมพ์ค้นหาจังหวัด" autocomplete="off">
+                <datalist id="provinceList">
+                  <option value="กรุงเทพมหานคร"><option value="กระบี่"><option value="กาญจนบุรี"><option value="กาฬสินธุ์"><option value="กำแพงเพชร"><option value="ขอนแก่น"><option value="จันทบุรี"><option value="ฉะเชิงเทรา"><option value="ชลบุรี"><option value="ชัยนาท"><option value="ชัยภูมิ"><option value="ชุมพร"><option value="เชียงราย"><option value="เชียงใหม่"><option value="ตรัง"><option value="ตราด"><option value="ตาก"><option value="นครนายก"><option value="นครปฐม"><option value="นครพนม"><option value="นครราชสีมา"><option value="นครศรีธรรมราช"><option value="นครสวรรค์"><option value="นนทบุรี"><option value="นราธิวาส"><option value="น่าน"><option value="บึงกาฬ"><option value="บุรีรัมย์"><option value="ปทุมธานี"><option value="ประจวบคีรีขันธ์"><option value="ปราจีนบุรี"><option value="ปัตตานี"><option value="พระนครศรีอยุธยา"><option value="พังงา"><option value="พัทลุง"><option value="พิจิตร"><option value="พิษณุโลก"><option value="เพชรบุรี"><option value="เพชรบูรณ์"><option value="แพร่"><option value="พะเยา"><option value="ภูเก็ต"><option value="มหาสารคาม"><option value="มุกดาหาร"><option value="แม่ฮ่องสอน"><option value="ยะลา"><option value="ยโสธร"><option value="ร้อยเอ็ด"><option value="ระนอง"><option value="ระยอง"><option value="ราชบุรี"><option value="ลพบุรี"><option value="ลำปาง"><option value="ลำพูน"><option value="เลย"><option value="ศรีสะเกษ"><option value="สกลนคร"><option value="สงขลา"><option value="สตูล"><option value="สมุทรปราการ"><option value="สมุทรสงคราม"><option value="สมุทรสาคร"><option value="สระแก้ว"><option value="สระบุรี"><option value="สิงห์บุรี"><option value="สุโขทัย"><option value="สุพรรณบุรี"><option value="สุราษฎร์ธานี"><option value="สุรินทร์"><option value="หนองคาย"><option value="หนองบัวลำภู"><option value="อ่างทอง"><option value="อำนาจเจริญ"><option value="อุดรธานี"><option value="อุตรดิตถ์"><option value="อุทัยธานี"><option value="อุบลราชธานี">
+                </datalist>
+              </div>
+              <div class="full">
+                <label>วันและเวลาที่สะดวกติดต่อ *</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                  <input type="date" id="contactDate" onchange="syncDateTime()">
+                  <select id="contactTimeSlot" onchange="syncDateTime()">
+                    <option value="">เลือกช่วงเวลา</option>
+                    <option value="ติดต่อได้ทันที">ติดต่อได้ทันที</option>
+                    <option value="ช่วงเช้า (09:00 - 12:00 น.)">ช่วงเช้า (09:00 - 12:00)</option>
+                    <option value="ช่วงบ่าย (13:00 - 16:00 น.)">ช่วงบ่าย (13:00 - 16:00)</option>
+                    <option value="ช่วงเย็น (16:00 - 18:30 น.)">ช่วงเย็น (16:00 - 18:30)</option>
+                  </select>
+                </div>
+                <input type="hidden" name="preferred_contact_time" id="preferredContactTimeCombined">
+              </div>
+              <div>
+                <label>ช่องทางติดต่อหลัก</label>
+                <select name="preferred_contact_channel" id="contactChannelSelect" onchange="onChannelChange()">
+                  <option value="โทรศัพท์">โทรศัพท์</option>
+                  <option value="LINE">LINE</option>
+                </select>
+              </div>
+              <div id="lineIdWrap" class="hidden">
+                <label>LINE ID *</label>
+                <input name="line_id" id="lineIdInput" placeholder="ระบุ LINE ID">
+              </div>
+            </div>
+
+            <!-- Step 4: PDPA Consent Form -->
+            <div class="form-step grid hidden" data-step="4">
+              <div class="full">
+                <div class="pdpa-box">
+                  <div class="pdpa-header">
+                    <h4>ความยินยอมข้อมูลส่วนบุคคล (PDPA)</h4>
+                    <span style="font-size:12px;color:var(--muted);display:block;margin-top:2px">
+                      ท่านสามารถศึกษารายละเอียดเพิ่มเติมได้ที่ 
+                      <a href="javascript:void(0)" style="color:var(--primary);font-weight:600;text-decoration:underline">นโยบายความเป็นส่วนตัวฉบับเต็ม</a>
+                    </span>
+                  </div>
+                  <div class="pdpa-item">
+                    <div class="pdpa-text"><b>1.</b> ยินยอมให้บริษัทหรือบริษัทในเครือติดต่อเพื่อนำเสนอ แจ้งข้อมูลผลิตภัณฑ์ บริการ รวมถึงข้อเสนอ โปรโมชั่น และกิจกรรมทางการตลาด</div>
+                    <div class="pdpa-choices">
+                      <label class="pdpa-choice-label"><input type="radio" name="consent_marketing" value="AGREE" checked> ยินยอม</label>
+                      <label class="pdpa-choice-label"><input type="radio" name="consent_marketing" value="DISAGREE"> ไม่ยินยอม</label>
+                    </div>
+                  </div>
+                  <div class="pdpa-item">
+                    <div class="pdpa-text"><b>2.</b> ยินยอมให้นำเสนอผลิตภัณฑ์/บริการผ่านช่องทางการสื่อสารออนไลน์ (Online Marketing)</div>
+                    <div class="pdpa-choices">
+                      <label class="pdpa-choice-label"><input type="radio" name="consent_social_media" value="AGREE" checked> ยินยอม</label>
+                      <label class="pdpa-choice-label"><input type="radio" name="consent_social_media" value="DISAGREE"> ไม่ยินยอม</label>
+                    </div>
+                  </div>
+                  <div class="pdpa-item" style="border-left: 3.5px solid var(--primary);">
+                    <div class="pdpa-text"><b>3.</b> ยินยอมให้เจ้าหน้าที่ผู้เชี่ยวชาญติดต่อกลับเพื่อแจ้งรายละเอียด นำเสนอราคาเบี้ยประกันภัย และประสานงานเอกสาร <span style="color:var(--danger)">*</span></div>
+                    <div class="pdpa-choices">
+                      <label class="pdpa-choice-label"><input type="radio" name="consent_contact" value="AGREE" checked> ยินยอม</label>
+                      <label class="pdpa-choice-label"><input type="radio" name="consent_contact" value="DISAGREE"> ไม่ยินยอม</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="actions end">
+              <button id="backBtn" class="ghost" type="button" onclick="prevStep()">ย้อนกลับ</button>
+              <div class="action-right-wrap">
+                <button id="nextBtn" class="primary" type="button" onclick="nextStep()">ถัดไป</button>
+                <button id="submitBtn" class="primary hidden" type="button" onclick="submitLead(event)">ส่งข้อมูลและรับ OTP</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+
+    <!-- 7. OTP VIEW -->
+    <section id="otpView" class="card hidden" style="max-width:400px;margin:20px auto">
+      <h2>ยืนยันเบอร์โทรศัพท์</h2>
+      <p class="intro">กรอกรหัส OTP 6 หลักที่ได้รับ</p>
+      <div id="otpMsg"></div>
+      <p><input id="otpCode" inputmode="numeric" maxlength="6" style="text-align:center;font-size:22px;letter-spacing:6px" placeholder="000000"></p>
+      <div class="actions" style="margin-top:16px">
+        <button type="button" class="primary" style="flex:1" onclick="verifyOtp()">ยืนยันรหัส</button>
+        <button type="button" class="ghost" onclick="requestOtp()">ขอรหัสใหม่</button>
+      </div>
+    </section>
+
+    <!-- 8. CUSTOMER SUCCESS VIEW -->
+    <section id="customerSuccessView" class="card hidden" style="max-width:500px;margin:40px auto;text-align:center;padding:40px 24px;">
+      <div style="width:72px;height:72px;background:#dcfce7;color:#16a34a;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:16px">✓</div>
+      <h2 style="font-size:22px;color:var(--primary);margin-bottom:10px">ส่งข้อมูลสำเร็จเรียบร้อย</h2>
+      <p style="color:var(--muted);font-size:14.5px;line-height:1.6;margin-bottom:24px;">
+        ขณะนี้เราได้รับข้อมูลของท่านแล้ว พนักงานจะติดต่อกลับหาท่านตามเวลาที่ได้ระบุไว้ในเอกสาร
+      </p>
+      <div style="background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:24px;font-size:13.5px;">
+        เลขอ้างอิงรายการ: <b id="successLeadRef" style="color:var(--primary)">-</b>
+      </div>
+      <button type="button" class="primary" style="width:100%" onclick="window.location.reload()">ปิดหน้าต่างนี้</button>
+    </section>
+
+    <!-- 9. PASSWORD VIEW -->
+    <section id="passwordView" class="card hidden" style="max-width:400px;margin:20px auto">
+      <h2>เปลี่ยนรหัสผ่าน</h2>
+      <div id="passwordMsg"></div>
+      <p><label>รหัสผ่านเดิม</label><input id="oldPass" type="password"></p>
+      <p><label>รหัสผ่านใหม่ (อย่างน้อย 6 ตัว)</label><input id="newPass" type="password"></p>
+      <button type="button" class="primary" style="width:100%;margin-top:10px" onclick="changePassword()">บันทึกรหัสผ่านใหม่</button>
+    </section>
+  </main>
+
+  <!-- ================= MODAL: หน้ารายละเอียด LEAD & TELESALES ACTION ================= -->
+  <div id="leadDetailModal" class="modal hidden">
+    <div class="card">
+      <div class="modal-top-header" style="margin-bottom:8px;">
+        <div>
+          <div class="eyebrow" id="dtLeadRef">LEAD REFERENCE</div>
+          <h2 style="font-size:18px;margin:0;" id="dtCustomerName">ชื่อลูกค้า</h2>
+        </div>
+        <button type="button" class="modal-close-pill-btn" onclick="hide('leadDetailModal')">✕ ปิด</button>
+      </div>
+
+      <input type="hidden" id="dtLeadId">
+
+      <div style="background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px;">
+        <div class="grid" style="gap:10px;">
+          <div class="detail-field">
+            <span>เบอร์โทรศัพท์:</span>
+            <b id="dtPhoneWrap">-</b>
+          </div>
+          <div class="detail-field">
+            <span>จังหวัด / สาขา:</span>
+            <b id="dtLocation">-</b>
+          </div>
+          <div class="detail-field">
+            <span>วัน-เวลาสะดวกให้ติดต่อ:</span>
+            <b id="dtPreferredTime">-</b>
+          </div>
+          <div class="detail-field">
+            <span>ช่องทางติดต่อหลัก:</span>
+            <b id="dtChannel">-</b>
+          </div>
+          <div class="detail-field">
+            <span>ข้อมูลรถยนต์:</span>
+            <b id="dtCarInfo">-</b>
+          </div>
+          <div class="detail-field">
+            <span>แผนประกันที่สนใจ:</span>
+            <b id="dtInsuranceType">-</b>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section-title">📞 บันทึกผลการโทรและติดตามงาน (Telesales Action)</div>
+      
+      <div class="grid" style="gap:12px;">
+        <div>
+          <label>เปลี่ยนสถานะ Lead *</label>
+          <select id="dtActionStatus">
+            <option value="CONTACTING">กำลังติดต่อ (โทรแล้ว/รอสาย)</option>
+            <option value="FOLLOW_UP">นัดติดตามผล (รอตัดสินใจ)</option>
+            <option value="INTERESTED">สนใจมาก (ส่งใบเสนอราคา)</option>
+            <option value="WON">ปิดการขายสำเร็จ (ทำสัญญาแล้ว)</option>
+            <option value="LOST">ไม่สนใจ / ยกเลิก</option>
+          </select>
+        </div>
+
+        <div>
+          <label>วันนัดติดตามครั้งถัดไป</label>
+          <input type="date" id="dtActionNextFollow">
+        </div>
+
+        <div class="full">
+          <label>ผลการพูดคุย / หมายเหตุ (Note)</label>
+          <textarea id="dtActionNote" rows="3" placeholder="ระบุรายละเอียดผลการโทร"></textarea>
+        </div>
+      </div>
+
+      <div class="actions" style="justify-content:flex-end;margin-top:16px;gap:8px;">
+        <button type="button" class="ghost" onclick="hide('leadDetailModal')">ยกเลิก</button>
+        <button type="button" class="primary" onclick="saveLeadDetailAction()">💾 บันทึกข้อมูล</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: FORGOT PASSWORD -->
+  <div id="forgotPasswordModal" class="modal hidden">
+    <div class="card">
+      <h3>กู้คืนรหัสผ่าน</h3>
+      <p class="intro">ยืนยันตัวตนด้วย Username และเบอร์โทรศัพท์</p>
+      <div id="forgotMsg"></div>
+      <p><label>Username</label><input id="forgotUsername"></p>
+      <p><label>เบอร์โทรศัพท์</label><input id="forgotPhone" inputmode="tel"></p>
+      <p><label>รหัสผ่านใหม่ (6 ตัวขึ้นไป)</label><input id="forgotNewPass" type="password"></p>
+      <div class="actions" style="justify-content:flex-end;margin-top:16px">
+        <button type="button" class="ghost" onclick="hide('forgotPasswordModal')">ยกเลิก</button>
+        <button type="button" class="primary" onclick="submitResetPassword()">บันทึกรหัสผ่าน</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: QR CODE -->
+  <div id="qrModal" class="modal hidden">
+    <div class="card" style="text-align:center">
+      <h3>นามบัตร & QR Code</h3>
+      <p class="intro">ให้ลูกค้าสแกนเพื่อเปิดแบบฟอร์ม</p>
+      <div style="background:#f8fafc;border:2px solid var(--primary);border-radius:12px;padding:16px;margin-bottom:14px">
+        <div style="font-weight:700;color:var(--primary);font-size:14px" id="qrCompanyName">Autocorp Holding</div>
+        <div id="qrcodeCanvas" style="display:flex;justify-content:center;align-items:center;min-height:180px;margin:10px auto;"></div>
+        <strong id="qrAgentName" style="font-size:14px;display:block;margin-top:4px">-</strong>
+        <span id="qrAgentCode" class="badge badge-primary">-</span>
+        <div id="qrAgentBranch" style="font-size:11.5px;color:var(--muted);margin-top:2px">สาขา: -</div>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:12px">
+        <input id="refUrlInput" readonly style="font-size:11.5px;background:#f8fafc">
+        <button type="button" class="ghost" onclick="copyRefLink()">คัดลอก</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button type="button" class="success-btn" onclick="shareToLine()">แชร์ LINE</button>
+        <button type="button" class="ghost" onclick="hide('qrModal')">ปิด</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CREATE USER (ADMIN) -->
+  <div id="userModal" class="modal hidden">
+    <div class="card">
+      <h3>สร้างบัญชีพนักงาน</h3>
+      <div id="userMsg"></div>
+      <div class="grid">
+        <div><label>Username</label><input id="uUsername"></div>
+        <div><label>รหัสพนักงาน</label><input id="uCode"></div>
+        <div><label>ชื่อ–นามสกุล</label><input id="uName"></div>
+        <div><label>สาขา</label><input id="uBranch"></div>
+        <div><label>อีเมล</label><input id="uEmail"></div>
+        <div class="full">
+          <label>บทบาท (Role)</label>
+          <select id="uRole">
+            <option value="EMPLOYEE">พนักงานขายประกัน / ผู้แนะนำ</option>
+            <option value="TELESALES">ธุรการขาย / Telesales</option>
+            <option value="ADMIN">ผู้ดูแลระบบ (Admin)</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions" style="margin-top:16px;justify-content:flex-end">
+        <button type="button" class="ghost" onclick="hide('userModal')">ยกเลิก</button>
+        <button type="button" class="primary" onclick="createUser()">สร้างบัญชี</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Storage ปลอดภัย ไม่ Crash แม้ถูกบล็อกคุกกี้ใน iFrame
+    const Storage = {
+      data: {},
+      get(k) {
+        try { return window.localStorage ? (window.localStorage.getItem(k) || '') : (this.data[k] || ''); } catch (e) { return this.data[k] || ''; }
+      },
+      set(k, v) {
+        try { if (window.localStorage) window.localStorage.setItem(k, v); } catch (e) {}
+        this.data[k] = v;
+      },
+      remove(k) {
+        try { if (window.localStorage) window.localStorage.removeItem(k); } catch (e) {}
+        delete this.data[k];
+      }
+    };
+
+    const state = { 
+      token: Storage.get('ilm_token'), 
+      user: null, 
+      company: null, 
+      companies: [], 
+      leadId: '', 
+      ref: '', 
+      scriptUrl: '',
+      formStep: 1,
+      cachedLeads: [],
+      pendingUsers: [],
+      referralAgent: null
+    };
+
+    let companyBranches = {};
+
+    const CAR_DATABASE = {
+      'Toyota': ['Yaris / Yaris Ativ', 'Vios', 'Corolla Altis', 'Camry', 'Corolla Cross', 'Fortuner', 'Hilux Revo / Vigo', 'Veloz', 'Innova', 'Alphard / Vellfire'],
+      'Honda': ['City / City Hatchback', 'Civic', 'Accord', 'HR-V', 'CR-V', 'BR-V', 'WR-V', 'Mobilio', 'Jazz'],
+      'Isuzu': ['D-Max', 'MU-X', 'MU-7'],
+      'Mitsubishi': ['Xpander / Xpander Cross', 'Pajero Sport', 'Triton', 'Mirage', 'Attrage', 'Outlander PHEV'],
+      'Mazda': ['Mazda 2', 'Mazda 3', 'CX-3', 'CX-30', 'CX-5', 'CX-8', 'BT-50'],
+      'Ford': ['Ranger', 'Everest', 'Territory'],
+      'Nissan': ['Almera', 'Kicks', 'Navara', 'Terra', 'Note', 'March', 'Teana'],
+      'BYD': ['Dolphin', 'Atto 3', 'Seal', 'Sealion 6', 'M6'],
+      'MG': ['MG4', 'MG ZS / ZS EV', 'MG EP / ES', 'MG5', 'MG HS / HS PHEV', 'MG MAXUS 7 / 9', 'Cyberster'],
+      'NETA': ['NETA V', 'NETA V-II', 'NETA X'],
+      'GWM': ['ORA Good Cat', 'ORA 07', 'Haval H6', 'Haval Jolion', 'Tank 300', 'Tank 500'],
+      'Mercedes-Benz': ['C-Class', 'E-Class', 'S-Class', 'GLA', 'GLC', 'GLE', 'A-Class', 'CLA', 'EQB / EQE / EQS'],
+      'BMW': ['Series 3', 'Series 5', 'Series 7', 'X1', 'X3', 'X5', 'iX3 / iX / i4 / i5']
+    };
+
+    const $ = id => document.getElementById(id);
+    const hide = id => { const el = $(id); if (el) el.classList.add('hidden'); };
+    const show = id => { const el = $(id); if (el) el.classList.remove('hidden'); };
+
+    function notify(message, type = 'success') {
+      const container = $('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `<span>${type === 'success' ? '✓' : '✕'}</span> <div>${esc(message)}</div>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.add('show'), 10);
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 250);
+      }, 3000);
+    }
+
+    function startLoading(text = 'กำลังประมวลผล...') {
+      const el = $('globalLoadingText');
+      if (el) el.textContent = text;
+      show('globalLoading');
+    }
+    function stopLoading() {
+      hide('globalLoading');
+    }
+
+    function call(name, ...args) {
+      startLoading();
+      return new Promise((resolve, reject) => {
+        if (typeof google === 'undefined' || !google.script || !google.script.run) {
+          stopLoading();
+          reject(new Error('Google Script Run not available'));
+          return;
+        }
+        google.script.run
+          .withSuccessHandler(res => { stopLoading(); resolve(res); })
+          .withFailureHandler(err => { stopLoading(); reject(new Error(err.message || err)); })[name](...args);
+      });
+    }
+
+    function msg(id, text, error = false) { 
+      const el = $(id); 
+      if (el) el.innerHTML = text ? `<div class="msg ${error ? 'error' : ''}">${esc(text)}</div>` : ''; 
+    }
+    function esc(s) { return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+    function switchView(active) {
+      stopLoading();
+      const leadCont = $('leadContainer');
+      if (leadCont) leadCont.classList.remove('active-modal');
+
+      ['loginView', 'registerView', 'portalEmployee', 'portalTelesales', 'portalAdmin', 'otpView', 'customerSuccessView', 'passwordView'].forEach(id => {
+        if (id === active) show(id); else hide(id);
+      });
+      document.body.className = (active === 'loginView' || active === 'registerView') ? 'theme-login' : 'theme-portal';
+    }
+
+    function switchAdminTab(tab) {
+      const tabs = [
+        { key: 'analytics', btn: $('tabBtnAnalytics'), view: $('admTabAnalytics') },
+        { key: 'leads',     btn: $('tabBtnLeads'),     view: $('admTabLeads') },
+        { key: 'staff',     btn: $('tabBtnStaff'),     view: $('admTabStaff') }
+      ];
+
+      tabs.forEach(t => {
+        if (t.key === tab) {
+          if (t.btn) t.btn.classList.add('active');
+          if (t.view) t.view.classList.remove('hidden');
+        } else {
+          if (t.btn) t.btn.classList.remove('active');
+          if (t.view) t.view.classList.add('hidden');
+        }
+      });
+    }
+
+    /* ================= CUSTOM DROPDOWN ================= */
+    function toggleDropdown(type) {
+      const btn = $(`${type}DdBtn`);
+      if (!btn || btn.hasAttribute('disabled')) return;
+      
+      const menu = $(`${type}DdMenu`);
+      if (!menu) return;
+      const isOpen = menu.classList.contains('open');
+
+      closeAllDropdowns();
+      if (!isOpen) {
+        menu.classList.add('open');
+        btn.classList.add('active');
+      }
+    }
+
+    function closeAllDropdowns() {
+      document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.remove('open'));
+      document.querySelectorAll('.custom-dropdown-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.custom-dropdown-wrap')) {
+        closeAllDropdowns();
+      }
+    });
+
+    function selectBrand(brand) {
+      closeAllDropdowns();
+      $('brandDdLabel').textContent = (brand === 'OTHER') ? 'อื่นๆ (ระบุเอง)' : brand;
+      $('carBrandHidden').value = brand;
+
+      const modelBtn = $('modelDdBtn');
+      const modelMenu = $('modelDdMenu');
+
+      if (brand === 'OTHER') {
+        show('carBrandCustom'); $('carBrandCustom').value = '';
+        show('carModelCustom'); $('carModelCustom').value = '';
+        modelBtn.setAttribute('disabled', 'true');
+        $('modelDdLabel').textContent = 'อื่นๆ (ระบุเอง)';
+        $('carModelHidden').value = 'OTHER';
+      } else {
+        hide('carBrandCustom'); $('carBrandCustom').value = '';
+        hide('carModelCustom'); $('carModelCustom').value = '';
+        modelBtn.removeAttribute('disabled');
+        $('modelDdLabel').textContent = 'เลือกรุ่นรถ';
+        $('carModelHidden').value = '';
+
+        const models = CAR_DATABASE[brand] || [];
+        let html = '';
+        models.forEach(m => {
+          html += `<div class="custom-dropdown-item" onclick="selectModel('${esc(m)}')">${esc(m)}</div>`;
+        });
+        html += `<div class="custom-dropdown-item" onclick="selectModel('OTHER')">อื่นๆ (ระบุเอง)</div>`;
+        modelMenu.innerHTML = html;
+      }
+    }
+
+    function selectModel(model) {
+      closeAllDropdowns();
+      $('modelDdLabel').textContent = (model === 'OTHER') ? 'อื่นๆ (ระบุเอง)' : model;
+      $('carModelHidden').value = model;
+
+      if (model === 'OTHER') {
+        show('carModelCustom'); $('carModelCustom').focus();
+      } else {
+        hide('carModelCustom'); $('carModelCustom').value = '';
+      }
+    }
+
+    function selectYear(year) {
+      closeAllDropdowns();
+      $('yearDdLabel').textContent = year;
+      $('carYearHidden').value = year;
+    }
+
+    function initCarYearOptions() {
+      const menu = $('yearDdMenu');
+      if (!menu || menu.children.length > 0) return;
+      
+      const currentYear = 2026;
+      const minYear = 2000;
+      let html = '';
+      for (let y = currentYear; y >= minYear; y--) {
+        html += `<div class="custom-dropdown-item" onclick="selectYear('${y}')">${y}</div>`;
+      }
+      menu.innerHTML = html;
+    }
+
+    /* ================= BOOT APPLICATION ================= */
+    async function boot() {
+      initDatePicker();
+      initCarYearOptions();
+
+      // ดึงค่า ?ref= จาก URL
+      const urlParams = new URLSearchParams(window.location.search);
+      state.ref = urlParams.get('ref') || '';
+
+      if (state.ref) {
+        document.body.className = 'theme-portal';
+        showCustomerLeadForm();
+      } else {
+        showLogin();
+      }
+
+      try {
+        const b = await call('apiGetBootstrap', state.token, '', state.ref);
+        state.user = b.user;
+        state.company = b.company;
+        state.companies = b.companies || [];
+        state.referralAgent = b.referralAgent;
+
+        companyBranches = (b.options && b.options.branches) ? b.options.branches : {
+          'HONDA_MALIWAN': [{ name: 'สำนักงานใหญ่' }, { name: 'สุรินทร์' }, { name: 'บุรีรัมย์' }, { name: 'ภูเก็ต' }, { name: 'กระบี่' }],
+          'AUTOCLICK': [{ name: 'สำนักงานใหญ่' }, { name: 'สุรินทร์' }, { name: 'บุรีรัมย์' }, { name: 'ภูเก็ต' }, { name: 'กระบี่' }]
+        };
+
+        renderCompanyChoices();
+
+        if (state.ref) {
+          applyUserTheme();
+          document.body.className = 'theme-portal';
+          showCustomerLeadForm();
+        } else if (state.user) {
+          applyUserTheme();
+          if (state.user.must_change_password) switchView('passwordView');
+          else routeUserByRole();
+        } else {
+          resetToCentralTheme();
+          showLogin();
+        }
+      } catch (e) {
+        if (state.ref) {
+          document.body.className = 'theme-portal';
+          showCustomerLeadForm();
+        } else {
+          showLogin();
+        }
+      }
+    }
+
+    function showCustomerLeadForm() {
+      stopLoading();
+      ['loginView', 'registerView', 'portalEmployee', 'portalTelesales', 'portalAdmin', 'otpView', 'customerSuccessView', 'passwordView'].forEach(id => hide(id));
+      
+      const container = $('leadContainer');
+      container.classList.add('active-modal');
+
+      state.formStep = 1;
+      renderFormStep();
+
+      const closeBtn = document.querySelector('.modal-close-pill-btn');
+      if (closeBtn) closeBtn.style.display = 'none';
+
+      const agent = state.referralAgent;
+      if (agent) {
+        $('leadCompany').value = agent.company_id || '';
+        $('leadCompanyWrap').style.display = 'none';
+        
+        $('leadMsg').innerHTML = `
+          <div class="agent-desktop-box" style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:12px 16px;margin-bottom:16px;align-items:center;gap:12px">
+            <div style="font-size:24px">👤</div>
+            <div>
+              <div style="font-size:12px;color:var(--muted)">ตัวแทนประกันภัยที่ดูแลคุณ</div>
+              <b style="font-size:14.5px;color:var(--primary)">คุณ${esc(agent.display_name)}</b>
+              <span class="badge badge-primary" style="margin-left:6px">รหัส: ${esc(agent.employee_code)}</span>
+              <span style="font-size:12px;color:var(--muted);margin-left:4px">สาขา: ${esc(agent.branch)}</span>
+            </div>
+          </div>
+          <div class="agent-mobile-pill">
+            <span>👤 ผู้ดูแล:</span>
+            <strong>คุณ${esc(agent.display_name)}</strong>
+            <span style="color:var(--muted)">[${esc(agent.branch)}]</span>
+          </div>
+        `;
+      }
+    }
+
+    function resetToCentralTheme() {
+      document.documentElement.style.setProperty('--primary', '#0b2239');
+      $('brandHeaderName').textContent = '';
+    }
+
+    function applyUserTheme() {
+      if (!state.company) return;
+      if (state.company.primary_color) document.documentElement.style.setProperty('--primary', state.company.primary_color);
+      $('brandHeaderName').textContent = state.company.company_name || '';
+      $('leadTitle').textContent = state.company.welcome_message || 'แจ้งความสนใจประกันรถยนต์';
+    }
+
+    function routeUserByRole() {
+      stopLoading();
+      renderUserBar();
+      if (state.user.role === 'EMPLOYEE') {
+        switchView('portalEmployee');
+        $('empCardName').textContent = state.user.display_name || state.user.username;
+        $('empCardSub').textContent = `รหัสตัวแทน: ${state.user.employee_code} (${state.user.branch || 'ไม่ระบุ'})`;
+        loadLeads();
+      } else if (state.user.role === 'TELESALES') {
+        switchView('portalTelesales');
+        $('teleCardSub').textContent = `รหัสพนักงาน: ${state.user.employee_code} (${state.user.branch || 'ไม่ระบุ'})`;
+        loadLeads();
+      } else if (['ADMIN', 'SUPER_ADMIN'].includes(state.user.role)) {
+        switchView('portalAdmin');
+        switchAdminTab('analytics');
+        loadAdminBundle();
+      }
+    }
+
+    function renderUserBar() {
+      $('userbar').innerHTML = `
+        <span style="font-size:12px;margin-right:8px">
+          <b>${esc(state.user.display_name || state.user.username)}</b>
+        </span>
+        <button type="button" class="ghost" style="min-height:28px;padding:2px 8px;font-size:11px" onclick="logout()">ออก</button>
+      `;
+    }
+
+    function renderCompanyChoices() {
+      const options = '<option value="">เลือกบริษัท</option>' + state.companies.map(c => `<option value="${esc(c.company_id)}">${esc(c.company_name)}</option>`).join('');
+      $('regCompany').innerHTML = options;
+      $('leadCompany').innerHTML = options;
+      if (state.company) $('leadCompany').value = state.company.company_id;
+    }
+
+    function onRegisterCompanyChange() {
+      const companyId = $('regCompany').value;
+      const branchSelect = $('regBranch');
+      if (!companyId) {
+        branchSelect.innerHTML = '<option value="">เลือกบริษัทก่อน</option>';
+        branchSelect.disabled = true;
+        return;
+      }
+      const list = companyBranches[companyId] || [{ name: 'สำนักงานใหญ่' }];
+      let opts = '<option value="">เลือกสาขา</option>';
+      list.forEach(b => { opts += `<option value="${esc(b.name)}">${esc(b.name)}</option>`; });
+      branchSelect.innerHTML = opts;
+      branchSelect.disabled = false;
+    }
+
+    function initDatePicker() {
+      const today = new Date().toISOString().split('T')[0];
+      const dateInput = $('contactDate');
+      if (dateInput) { dateInput.min = today; if (!dateInput.value) dateInput.value = today; }
+      syncDateTime();
+    }
+
+    function syncDateTime() {
+      const d = $('contactDate') ? $('contactDate').value : '';
+      const s = $('contactTimeSlot') ? $('contactTimeSlot').value : '';
+      if ($('preferredContactTimeCombined')) {
+        $('preferredContactTimeCombined').value = (d && s) ? `${d} ${s}` : '';
+      }
+    }
+
+    function onChannelChange() {
+      const channel = $('contactChannelSelect').value;
+      if (channel === 'LINE') { show('lineIdWrap'); $('lineIdInput').focus(); }
+      else { hide('lineIdWrap'); $('lineIdInput').value = ''; }
+    }
+
+    function showLogin() { 
+      stopLoading(); 
+      const leadCont = $('leadContainer');
+      if (leadCont) leadCont.classList.remove('active-modal');
+      resetToCentralTheme(); 
+      switchView('loginView'); 
+    }
+
+    function showRegister() { 
+      stopLoading(); 
+      const leadCont = $('leadContainer');
+      if (leadCont) leadCont.classList.remove('active-modal');
+      switchView('registerView'); 
+    }
+
+    function showForgotPasswordModal() { show('forgotPasswordModal'); }
+
+    async function submitResetPassword() {
+      const u = $('forgotUsername').value.trim(), p = $('forgotPhone').value.trim(), np = $('forgotNewPass').value.trim();
+      if (!u || !p || !np || np.length < 6) { notify('กรุณากรอกข้อมูลให้ครบ รหัสใหม่ 6 ตัวขึ้นไป', 'error'); return; }
+      try {
+        await call('apiResetPasswordWithVerification', u, p, np);
+        hide('forgotPasswordModal');
+        notify('ตั้งรหัสผ่านใหม่สำเร็จ เข้าสู่ระบบได้ทันที', 'success');
+      } catch (e) { notify(e.message, 'error'); }
+    }
+
+    function showLeadForm() {
+      state.formStep = 1;
+      initDatePicker();
+      initCarYearOptions();
+      
+      const container = $('leadContainer');
+      container.classList.add('active-modal');
+      
+      const closeBtn = document.querySelector('.modal-close-pill-btn');
+      if (closeBtn) closeBtn.style.display = 'inline-flex';
+
+      renderFormStep();
+    }
+
+    function cancelLeadForm() {
+      const container = $('leadContainer');
+      if (container) {
+        container.classList.remove('active-modal');
+      }
+      stopLoading();
+      if (state.user && state.user.role) {
+        if (state.user.role === 'EMPLOYEE') switchView('portalEmployee');
+        else if (state.user.role === 'TELESALES') switchView('portalTelesales');
+        else switchView('portalAdmin');
+      } else {
+        showLogin();
+      }
+    }
+
+    function renderFormStep() {
+      document.querySelectorAll('.form-step').forEach(x => x.classList.toggle('hidden', Number(x.dataset.step) !== state.formStep));
+      document.querySelectorAll('.desktop-steps .step').forEach((x, i) => x.classList.toggle('on', i + 1 === state.formStep));
+
+      const fillPercent = (state.formStep / 4) * 100;
+      const mFill = $('mobileProgressBarFill');
+      if (mFill) mFill.style.width = fillPercent + '%';
+
+      const backBtn = $('backBtn');
+      if (backBtn) {
+        backBtn.style.visibility = (state.formStep === 1) ? 'hidden' : 'visible';
+        backBtn.style.pointerEvents = (state.formStep === 1) ? 'none' : 'auto';
+      }
+
+      $('nextBtn').classList.toggle('hidden', state.formStep === 4);
+      $('submitBtn').classList.toggle('hidden', state.formStep !== 4);
+      
+      const modalBox = document.querySelector('.lead-container .card');
+      if (modalBox) modalBox.scrollTop = 0;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function validateStep() {
+      if (state.formStep === 1 && !$('leadCompany').value) {
+        notify('กรุณาเลือกบริษัท', 'error'); return false;
+      }
+      if (state.formStep === 2) {
+        if (!$('carBrandHidden').value) { notify('กรุณาเลือกยี่ห้อรถ', 'error'); return false; }
+        if (!$('carModelHidden').value) { notify('กรุณาเลือกรุ่นรถ', 'error'); return false; }
+        if (!$('carYearHidden').value) { notify('กรุณาเลือกปีรถ (ค.ศ.)', 'error'); return false; }
+      }
+      if (state.formStep === 3) {
+        syncDateTime();
+        if (!$('custFirstName').value.trim() || !$('custLastName').value.trim()) { notify('กรุณากรอกชื่อและนามสกุล', 'error'); return false; }
+        if (!$('custPhone').value.trim()) { notify('กรุณากรอกเบอร์โทรศัพท์', 'error'); return false; }
+        if (!$('preferredContactTimeCombined').value) { notify('กรุณาเลือกวันและเวลาสะดวก', 'error'); return false; }
+      }
+      if (state.formStep === 4) {
+        const consent = document.querySelector('input[name="consent_contact"]:checked');
+        if (!consent || consent.value !== 'AGREE') { notify('กรุณายินยอมข้อ 3 เพื่อให้ติดต่อกลับได้', 'error'); return false; }
+      }
+      return true;
+    }
+
+    function nextStep() { if (validateStep() && state.formStep < 4) { state.formStep++; renderFormStep(); } }
+    function prevStep() { if (state.formStep > 1) { state.formStep--; renderFormStep(); } }
+
+    async function login() {
+      try {
+        const user = $('loginUser').value.trim();
+        const pass = $('loginPass').value.trim();
+        if (!user || !pass) {
+          notify('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน', 'error');
+          return;
+        }
+
+        const r = await call('apiLogin', user, pass);
+        state.token = r.token;
+        state.user = r.user;
+        Storage.set('ilm_token', state.token);
+        
+        const b = await call('apiGetBootstrap', state.token, '', '');
+        state.company = b.company;
+        applyUserTheme();
+        if (r.mustChangePassword) switchView('passwordView');
+        else routeUserByRole();
+      } catch (e) { notify(e.message, 'error'); }
+    }
+
+    async function logout() {
+      await call('apiLogout', state.token).catch(() => {});
+      Storage.remove('ilm_token');
+      state.token = ''; state.user = null; state.company = null;
+      showLogin(); $('userbar').innerHTML = '';
+    }
+
+    async function loadAdminBundle() {
+      try {
+        const bundle = await call('apiGetAdminDashboardBundle', state.token);
+        state.cachedLeads = bundle.leads || [];
+        state.pendingUsers = bundle.pendingUsers || [];
+        renderAdminDashboard(state.cachedLeads);
+        renderExecutiveAnalytics(state.cachedLeads);
+        renderAdminPendingUsers(state.pendingUsers);
+      } catch (e) { if (/Session/.test(e.message)) logout(); }
+    }
+
+    async function loadLeads() {
+      if (['ADMIN', 'SUPER_ADMIN'].includes(state.user.role)) { loadAdminBundle(); return; }
+      try {
+        const rows = await call('apiListLeads', state.token, { limit: 200 });
+        state.cachedLeads = rows;
+        if (state.user.role === 'EMPLOYEE') renderEmployeeDashboard(rows);
+        else if (state.user.role === 'TELESALES') renderTelesalesDashboard(rows);
+      } catch (e) { if (/Session/.test(e.message)) logout(); }
+    }
+
+    function renderEmployeeDashboard(rows) {
+      $('empStatAll').textContent = rows.length;
+      $('empStatVerified').textContent = rows.filter(x => x.verification_status === 'VERIFIED').length;
+      $('empStatFollow').textContent = rows.filter(x => ['CONTACTING', 'FOLLOW_UP'].includes(x.lead_status)).length;
+      $('empStatWon').textContent = rows.filter(x => x.lead_status === 'WON').length;
+      $('empLeadRows').innerHTML = rows.map(r => `
+        <tr><td><code>${esc(r.lead_reference)}</code></td><td><b>${esc(r.customer_name)}</b></td><td>${esc(r.branch)}</td><td>${esc(r.car_brand)}</td><td><span class="badge badge-primary">${esc(r.insurance_type)}</span></td><td>${getStatusBadge(r.lead_status)}</td><td>${esc(r.created_at)}</td></tr>
+      `).join('') || '<tr><td colspan="7" style="text-align:center">ยังไม่มีข้อมูลลูกค้าที่แนะนำ</td></tr>';
+    }
+
+    function renderTelesalesDashboard(rows) {
+      $('teleStatAll').textContent = rows.length;
+      $('teleStatPending').textContent = rows.filter(x => x.lead_status === 'VERIFIED').length;
+      $('teleStatFollow').textContent = rows.filter(x => ['CONTACTING', 'FOLLOW_UP'].includes(x.lead_status)).length;
+      $('teleStatWon').textContent = rows.filter(x => x.lead_status === 'WON').length;
+      filterTelesalesLeads();
+    }
+
+    function filterTelesalesLeads() {
+      const filter = $('teleFilterStatus').value;
+      const list = filter === 'ALL' ? state.cachedLeads : state.cachedLeads.filter(x => x.lead_status === filter);
+      $('teleLeadRows').innerHTML = list.map(r => `
+        <tr>
+          <td><b>${esc(r.customer_name)}</b><br><small style="color:var(--muted)">${esc(r.province)}</small></td>
+          <td><span class="badge badge-primary">${esc(r.branch || 'ไม่ระบุ')}</span><small style="display:block;color:var(--muted);font-size:11px">${esc(r.company_id || '-')}</small></td>
+          <td><a href="tel:${esc(r.customer_phone)}" style="color:var(--primary);font-weight:600">${esc(r.customer_phone)}</a></td>
+          <td>${esc(r.preferred_contact_time || '-')}</td>
+          <td>${esc([r.car_brand, r.car_model, r.insurance_type].filter(Boolean).join(' / '))}</td>
+          <td>${getStatusBadge(r.lead_status)}</td>
+          <td><button type="button" class="primary" style="min-height:32px;padding:4px 10px;font-size:12px" onclick="openLeadDetail('${esc(r.lead_id)}')">📋 ดูรายละเอียด & โทร</button></td>
+        </tr>
+      `).join('') || '<tr><td colspan="7" style="text-align:center">ไม่มีรายการงานในสถานะนี้</td></tr>';
+    }
+
+    function openLeadDetail(leadId) {
+      const lead = state.cachedLeads.find(x => x.lead_id === leadId);
+      if (!lead) return;
+
+      $('dtLeadId').value = leadId;
+      $('dtLeadRef').textContent = `เลขอ้างอิง: ${lead.lead_reference}`;
+      $('dtCustomerName').textContent = `คุณ ${lead.customer_name}`;
+      
+      $('dtPhoneWrap').innerHTML = `<a href="tel:${esc(lead.customer_phone)}" style="color:var(--primary);text-decoration:underline;">📞 ${esc(lead.customer_phone)}</a>`;
+      $('dtLocation').textContent = `${lead.province || '-'} (สังกัด: ${lead.branch || 'ไม่ระบุ'})`;
+      $('dtPreferredTime').textContent = lead.preferred_contact_time || 'ติดต่อได้ทันที';
+      $('dtChannel').textContent = lead.preferred_contact_channel || 'โทรศัพท์';
+      $('dtCarInfo').textContent = `${lead.car_brand || '-'} ${lead.car_model || ''} (ปี ${lead.car_year || '-'})`;
+      $('dtInsuranceType').textContent = `${lead.insurance_type || '-'} (${lead.insurance_expiry_period ? 'หมดอายุ: ' + lead.insurance_expiry_period : 'ไม่มีข้อมูล'})`;
+
+      $('dtActionStatus').value = lead.lead_status || 'CONTACTING';
+      $('dtActionNote').value = lead.last_note || '';
+      $('dtActionNextFollow').value = lead.next_follow_up_at || '';
+
+      show('leadDetailModal');
+    }
+
+    async function saveLeadDetailAction() {
+      const leadId = $('dtLeadId').value;
+      const status = $('dtActionStatus').value;
+      const note = $('dtActionNote').value.trim();
+      const nextFollow = $('dtActionNextFollow').value;
+
+      const patch = {
+        lead_status: status,
+        last_note: note,
+        next_follow_up_at: nextFollow
+      };
+
+      try {
+        await call('apiUpdateLead', state.token, leadId, patch);
+        hide('leadDetailModal');
+        notify('บันทึกผลการติดตามสำเร็จเรียบร้อย', 'success');
+        loadLeads();
+      } catch (e) {
+        notify(e.message, 'error');
+      }
+    }
+
+    function renderAdminDashboard(rows) {
+      $('admStatAll').textContent = rows.length;
+      $('admStatPending').textContent = rows.filter(x => x.lead_status === 'PENDING_VERIFICATION' || x.lead_status === 'VERIFIED').length;
+      $('admStatFollow').textContent = rows.filter(x => ['CONTACTING', 'FOLLOW_UP'].includes(x.lead_status)).length;
+      $('admStatWon').textContent = rows.filter(x => x.lead_status === 'WON').length;
+      $('admLeadRows').innerHTML = rows.map(r => `
+        <tr><td><code>${esc(r.lead_reference)}</code></td><td>${esc(r.customer_name)}</td><td>${esc(r.branch)}</td><td>${esc(r.customer_phone)}</td><td>${esc(r.car_brand)} / ${esc(r.insurance_type)}</td><td>${getStatusBadge(r.lead_status)}</td><td>${esc(r.assigned_to || 'ยังไม่ได้มอบหมาย')}</td><td>${esc(r.created_at)}</td></tr>
+      `).join('') || '<tr><td colspan="8" style="text-align:center">ไม่มีข้อมูล</td></tr>';
+    }
+
+    function renderExecutiveAnalytics(rows) {
+      const branchStats = {};
+      rows.forEach(r => {
+        const b = r.branch || 'ส่วนกลาง / ไม่ระบุ';
+        if (!branchStats[b]) branchStats[b] = { total: 0, won: 0 };
+        branchStats[b].total++;
+        if (r.lead_status === 'WON') branchStats[b].won++;
+      });
+
+      const branchList = Object.keys(branchStats).map(name => {
+        const item = branchStats[name];
+        const rate = item.total > 0 ? ((item.won / item.total) * 100).toFixed(1) : 0;
+        return { name, total: item.total, won: item.won, rate: parseFloat(rate) };
+      });
+      branchList.sort((a, b) => b.rate - a.rate || b.won - a.won);
+
+      $('branchRankingList').innerHTML = branchList.length ? branchList.map(b => `
+        <div class="branch-card" onclick="openBranchDetails('${esc(b.name)}')" title="คลิกเพื่อดูรายการ">
+          <div>
+            <b style="font-size:13px;color:var(--primary)">📍 ${esc(b.name)}</b>
+            <div style="font-size:11px;color:var(--muted)">ทั้งหมด ${b.total} | ปิดได้ ${b.won} รายการ</div>
+          </div>
+          <span class="badge ${b.won > 0 ? 'badge-success' : 'badge-primary'}">สำเร็จ ${b.rate}%</span>
+        </div>
+      `).join('') : '<div style="text-align:center;padding:12px;color:var(--muted);font-size:12px">ยังไม่มีข้อมูล</div>';
+
+      const products = {};
+      rows.forEach(r => {
+        const type = r.insurance_type || 'อื่นๆ';
+        products[type] = (products[type] || 0) + 1;
+      });
+
+      const productSorted = Object.entries(products).sort((a, b) => b[1] - a[1]);
+      $('productTrendList').innerHTML = productSorted.length ? productSorted.map(([type, count]) => {
+        const percent = rows.length ? ((count / rows.length) * 100).toFixed(1) : 0;
+        return `
+          <div onclick="openProductDetails('${esc(type)}')" style="margin-bottom:8px;cursor:pointer">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px">
+              <b>🛡️ ${esc(type)}</b>
+              <span>${count} เคส (${percent}%)</span>
+            </div>
+            <div style="width:100%;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden">
+              <div style="width:${percent}%;height:100%;background:var(--primary);border-radius:3px"></div>
+            </div>
+          </div>
+        `;
+      }).join('') : '<div style="text-align:center;padding:12px;color:var(--muted);font-size:12px">ยังไม่มีข้อมูล</div>';
+    }
+
+    function openBranchDetails(branchName) {
+      const filtered = state.cachedLeads.filter(r => (r.branch || 'ส่วนกลาง / ไม่ระบุ') === branchName);
+      renderDrilldownTable(filtered);
+      show('drilldownModal');
+    }
+
+    function openProductDetails(insuranceType) {
+      const filtered = state.cachedLeads.filter(r => (r.insurance_type || 'อื่นๆ') === insuranceType);
+      renderDrilldownTable(filtered);
+      show('drilldownModal');
+    }
+
+    function renderDrilldownTable(list) {
+      $('drilldownRows').innerHTML = list.length ? list.map(r => `
+        <tr>
+          <td><code>${esc(r.lead_reference)}</code></td>
+          <td><b>${esc(r.customer_name)}</b></td>
+          <td>${esc(r.customer_phone)}</td>
+          <td>${esc(r.branch || '-')}</td>
+          <td><span class="badge badge-primary">${esc(r.insurance_type)}</span></td>
+          <td>${getStatusBadge(r.lead_status)}</td>
+        </tr>
+      `).join('') : '<tr><td colspan="6" style="text-align:center;padding:14px;color:var(--muted)">ไม่มีรายการ</td></tr>';
+    }
+
+    function renderAdminPendingUsers(rows) {
+      $('adminPendingUsers').innerHTML = rows.length ? `
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>ชื่อ–นามสกุล</th><th>สาขา</th><th>Username</th><th>เบอร์โทร</th><th>กำหนดสิทธิ์</th><th>จัดการ</th></tr></thead>
+            <tbody>
+              ${rows.map(u => `
+                <tr>
+                  <td><b>${esc(u.display_name)}</b></td>
+                  <td><span class="badge badge-primary">${esc(u.branch || 'ไม่ระบุ')}</span></td>
+                  <td>${esc(u.username)}</td>
+                  <td>${esc(u.phone || '-')}</td>
+                  <td>
+                    <select id="role_sel_${esc(u.user_id)}" style="min-height:30px;padding:2px 4px;font-size:11.5px;width:auto">
+                      <option value="EMPLOYEE" ${u.role === 'EMPLOYEE' ? 'selected' : ''}>พนักงานขาย</option>
+                      <option value="TELESALES" ${u.role === 'TELESALES' ? 'selected' : ''}>Telesales</option>
+                      <option value="ADMIN" ${u.role === 'ADMIN' ? 'selected' : ''}>Admin</option>
+                    </select>
+                  </td>
+                  <td><button type="button" class="primary" style="min-height:28px;padding:2px 10px;font-size:11.5px" onclick="confirmApproveUser('${esc(u.user_id)}')">อนุมัติ</button></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      ` : '<div class="msg">ไม่มีคำขอสมัครใหม่ค้างอนุมัติ</div>';
+    }
+
+    async function confirmApproveUser(userId) {
+      try {
+        const role = $(`role_sel_${userId}`).value;
+        await call('apiApproveUserWithRole', state.token, userId, role);
+        notify('อนุมัติพนักงานสำเร็จ', 'success');
+        loadAdminBundle();
+      } catch (e) { notify(e.message, 'error'); }
+    }
+
+    function getStatusBadge(status) {
+      const map = {
+        'PENDING_VERIFICATION': '<span class="badge badge-warning">รอ OTP</span>',
+        'VERIFIED': '<span class="badge badge-primary">รอดำเนินการ</span>',
+        'CONTACTING': '<span class="badge badge-primary">กำลังติดต่อ</span>',
+        'FOLLOW_UP': '<span class="badge badge-warning">นัดติดตาม</span>',
+        'INTERESTED': '<span class="badge badge-success">สนใจมาก</span>',
+        'WON': '<span class="badge badge-success">ปิดการขายสำเร็จ</span>',
+        'LOST': '<span class="badge badge-danger">ไม่สนใจ</span>'
+      };
+      return map[status] || `<span class="badge">${esc(status)}</span>`;
+    }
+
+    async function registerEmployee() {
+      try {
+        const res = await call('apiRegisterEmployee', {
+          company_id: $('regCompany').value,
+          display_name: $('regName').value.trim(),
+          branch: $('regBranch').value.trim(),
+          employee_code: $('regCode').value.trim(),
+          username: $('regUsername').value.trim(),
+          phone: $('regPhone').value.trim(),
+          email: '',
+          role: $('regRole').value,
+          password: $('regPassword').value
+        });
+        ['regName', 'regCode', 'regUsername', 'regPhone', 'regPassword'].forEach(id => $(id).value = '');
+        notify('ลงทะเบียนสำเร็จ แจ้ง Admin เพื่ออนุมัติสิทธิ์', 'success');
+        showLogin();
+      } catch (e) { notify(e.message, 'error'); }
+    }
+
+    function getCleanWebUrl_() {
+      let rawUrl = state.scriptUrl || window.location.href;
+      let clean = rawUrl.split('?')[0].split('#')[0].replace(/\/u\/\d+\//, '/');
+      if (clean.indexOf('/exec') === -1 && clean.indexOf('/dev') === -1) clean = clean.replace(/\/edit.*$/, '/exec');
+      return clean;
+    }
+
+    function getReferralLink() {
+      const baseUrl = getCleanWebUrl_();
+      const agentCode = encodeURIComponent((state.user && state.user.employee_code) || '');
+      return `${baseUrl}?ref=${agentCode}&openExternalBrowser=1`;
+    }
+
+    function showReferralQrModal() {
+      let compName = 'Autocorp Holding';
+      if (state.company && state.company.company_name) {
+        compName = state.company.company_name;
+      } else if (state.user && state.user.company_id && state.companies.length) {
+        const found = state.companies.find(c => c.company_id === state.user.company_id);
+        if (found) compName = found.company_name;
+      }
+
+      $('qrCompanyName').textContent = compName;
+      const refUrl = getReferralLink();
+      $('refUrlInput').value = refUrl;
+
+      const qrBox = $('qrcodeCanvas');
+      qrBox.innerHTML = '';
+
+      if (typeof QRCode !== 'undefined') {
+        new QRCode(qrBox, {
+          text: refUrl,
+          width: 180,
+          height: 180,
+          colorDark: '#0f172a',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } else {
+        qrBox.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(refUrl)}" style="width:180px;height:180px;display:block;margin:auto" />`;
+      }
+
+      $('qrAgentName').textContent = state.user.display_name || state.user.username;
+      $('qrAgentCode').textContent = `รหัส: ${state.user.employee_code}`;
+      $('qrAgentBranch').textContent = `สาขา: ${state.user.branch || 'ไม่ระบุ'}`;
+      show('qrModal');
+    }
+
+    function copyRefLink() {
+      const url = getReferralLink();
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(url).then(() => notify('คัดลอกลิงก์แล้ว', 'success'));
+      } else {
+        const input = $('refUrlInput');
+        input.value = url; input.select();
+        document.execCommand('copy');
+        notify('คัดลอกลิงก์แล้ว', 'success');
+      }
+    }
+
+    function shareToLine() {
+      const url = getReferralLink();
+      window.open(`https://line.me/R/msg/text/?${encodeURIComponent('เช็คเบี้ยประกันภัยกับเรา: ' + url)}`, '_blank');
+    }
+
+    function showUserModal() { show('userModal'); }
+    async function createUser() {
+      try {
+        const r = await call('apiCreateUser', state.token, {
+          username: $('uUsername').value, employee_code: $('uCode').value, display_name: $('uName').value, branch: $('uBranch').value, email: $('uEmail').value, role: $('uRole').value, company_id: state.user.company_id
+        });
+        notify(`สร้างสำเร็จ รหัสผ่าน: ${r.temporaryPassword}`, 'success');
+        hide('userModal');
+        loadAdminBundle();
+      } catch (e) { notify(e.message, 'error'); }
+    }
+
+    function formObject(form) {
+      syncDateTime();
+      const o = Object.fromEntries(new FormData(form).entries());
+      o.company_id = o.company_id || (state.company ? state.company.company_id : '');
+      o.ref = state.ref;
+      o.car_brand = $('carBrandHidden').value;
+      o.car_model = $('carModelHidden').value;
+      o.car_year = $('carYearHidden').value;
+      o.preferred_contact_time = $('preferredContactTimeCombined').value;
+      o.consents = {
+        CONTACT_AND_MARKETING: o.consent_contact === 'AGREE',
+        DIRECT_MARKETING: o.consent_marketing === 'AGREE',
+        ONLINE_MARKETING: o.consent_social_media === 'AGREE'
+      };
+      return o;
+    }
+
+    async function submitLead(ev) {
+      if (ev) ev.preventDefault();
+      if (!validateStep()) return;
+      const btn = $('submitBtn');
+      if (btn) btn.disabled = true;
+
+      try {
+        const payload = formObject($('leadForm'));
+        const r = await call('apiCreateLead', payload);
+        state.leadId = r.leadId;
+        
+        const leadCont = $('leadContainer');
+        if (leadCont) leadCont.classList.remove('active-modal');
+
+        switchView('otpView');
+        notify('บันทึกข้อมูลแล้ว กรุณากรอก OTP', 'success');
+        await requestOtp();
+      } catch (e) { notify(e.message, 'error'); }
+      finally { if (btn) btn.disabled = false; }
+    }
+
+    async function requestOtp() {
+      try {
+        const r = await call('apiRequestOtp', state.leadId);
+        msg('otpMsg', r.testCode ? `[รหัสทดสอบ] คือ: ${r.testCode}` : 'ส่งรหัส OTP แล้ว');
+      } catch (e) { msg('otpMsg', e.message, true); }
+    }
+
+    async function verifyOtp() {
+      try {
+        const r = await call('apiVerifyOtp', state.leadId, $('otpCode').value);
+        notify('ยืนยันรหัสสำเร็จ!', 'success');
+        
+        if (state.ref) {
+          hide('otpView');
+          $('successLeadRef').textContent = r.reference || '-';
+          show('customerSuccessView');
+          document.body.className = 'theme-portal';
+        } else {
+          setTimeout(() => { if (state.user) routeUserByRole(); else showLogin(); }, 1200);
+        }
+      } catch (e) { notify(e.message, 'error'); }
+    }
+
+    // เรียกฟังก์ชันเริ่มต้นทำงาน
+    boot();
+  </script>
+</body>
+</html>
