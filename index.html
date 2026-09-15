@@ -1,71 +1,57 @@
 <script>
-  // ระบุ URL ของ Web App จาก Google Apps Script (ตรวจสอบให้ลงท้ายด้วย /exec)
-  const SCRIPT_URL = "https://script.google.com/macros/s/ใส่_WEB_APP_URL_ของคุณตรงนี้/exec";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-5huqOvvZt2kR34o0zPyHToWqG_pnd_gBwrny2lriQDJYTFUKXjkLVq-T6M5Fjkv9/exec";
 
-  // Polyfill จำลอง google.script.run แบบรองรับ Chaining เต็มรูปแบบ
   (function() {
-    function createRunner() {
-      var successHandler = null;
-      var failureHandler = null;
-
-      var runner = {
-        withSuccessHandler: function(fn) {
-          successHandler = fn;
-          return runner;
-        },
-        withFailureHandler: function(fn) {
-          failureHandler = fn;
-          return runner;
-        },
-        withUserObject: function() {
-          return runner;
+    function executeCall(functionName, args, successHandler, failureHandler) {
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: functionName,
+          params: args
+        })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(response) {
+        if (response && response.status === 'success') {
+          if (typeof successHandler === 'function') successHandler(response.data);
+        } else {
+          var err = new Error(response ? response.message : 'Error occurred');
+          if (typeof failureHandler === 'function') failureHandler(err);
+          else console.error(err);
         }
-      };
+      })
+      .catch(function(err) {
+        if (typeof failureHandler === 'function') failureHandler(err);
+        else console.error(err);
+      });
+    }
 
-      return new Proxy(runner, {
+    function createProxy(handlers) {
+      handlers = handlers || {};
+
+      return new Proxy({}, {
         get: function(target, prop) {
-          if (prop in target) {
-            return target[prop];
+          if (prop === 'withSuccessHandler') {
+            return function(fn) {
+              return createProxy({ ...handlers, success: fn });
+            };
+          }
+          if (prop === 'withFailureHandler') {
+            return function(fn) {
+              return createProxy({ ...handlers, failure: fn });
+            };
+          }
+          if (prop === 'withUserObject') {
+            return function() {
+              return createProxy(handlers);
+            };
           }
 
-          // เมื่อมีการเรียกชื่อฟังก์ชันหลังบ้าน (เช่น checkLogin, getData)
+          // เมื่อมีการเข้าถึงชื่อฟังก์ชัน ไม่ว่าจะผ่าน .funcName() หรือ [name]()
           return function() {
             var args = Array.prototype.slice.call(arguments);
-
-            fetch(SCRIPT_URL, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'text/plain;charset=utf-8' // ป้องกัน CORS preflight
-              },
-              body: JSON.stringify({
-                action: prop,
-                params: args
-              })
-            })
-            .then(function(res) {
-              return res.json();
-            })
-            .then(function(response) {
-              if (response.status === 'success') {
-                if (typeof successHandler === 'function') {
-                  successHandler(response.data);
-                }
-              } else {
-                var err = new Error(response.message || 'Error occurred');
-                if (typeof failureHandler === 'function') {
-                  failureHandler(err);
-                } else {
-                  console.error(err);
-                }
-              }
-            })
-            .catch(function(err) {
-              if (typeof failureHandler === 'function') {
-                failureHandler(err);
-              } else {
-                console.error(err);
-              }
-            });
+            executeCall(prop, args, handlers.success, handlers.failure);
           };
         }
       });
@@ -73,13 +59,7 @@
 
     window.google = window.google || {};
     window.google.script = window.google.script || {};
-    
-    Object.defineProperty(window.google.script, 'run', {
-      get: function() {
-        return createRunner();
-      },
-      configurable: true
-    });
+    window.google.script.run = createProxy();
   })();
 </script>
 <!DOCTYPE html>
